@@ -1,11 +1,3 @@
-import { createContext, useState } from "react";
-
-export const defaultWorldleContext : WordleContext = {words: [], currentCell: {}};
-const worldleContext = createContext( {
-  words: [],
-
-});
-
 export enum cellStatus {
   UNTOUCHED,
   TOUCHED,
@@ -37,12 +29,4 @@ const defaultCellContext : CellContext = {
   row: 0,
   column : 0
 };
-
-
-interface WordleContext {
-  words :  [WordContext] | [],
-  currentCell : CellContext | {},
-
-
-}
 

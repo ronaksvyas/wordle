@@ -1,5 +1,10 @@
-import { Stack } from "@chakra-ui/react";
+import React from 'react';
+import { Stack } from '@chakra-ui/react';
 
 export default function Layout({ children, ...props }) {
-  return <Stack spacing='64px' margin={'15vw'} marginTop={'auto'} {...props}>{children}</Stack>;
+  return (
+    <Stack spacing="64px" margin={'15vw'} marginTop={'auto'} {...props}>
+      {children}
+    </Stack>
+  );
 }

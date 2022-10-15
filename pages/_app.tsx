@@ -1,13 +1,24 @@
-import React from "react";
-import { ChakraProvider } from "@chakra-ui/provider";
-import theme from "./theme";
+import React, { useReducer } from 'react';
+import { ChakraProvider } from '@chakra-ui/provider';
+import theme from './theme';
+import { initialState } from '../store/state';
+import reducer from '../store/reducer';
 
-function WordleApp({Component, pageProps}) {
+export const WordleContext = React.createContext({
+  state: initialState,
+  dispatch: null,
+});
+
+function WordleApp({ Component, pageProps }) {
+  const [state, dispatch] = useReducer(reducer, initialState); 
+
   return (
     <ChakraProvider theme={theme}>
-      <Component {...pageProps} />
+      <WordleContext.Provider value={{ state: state, dispatch: dispatch }}>
+        <Component {...pageProps} />
+      </WordleContext.Provider>
     </ChakraProvider>
-  )
+  );
 }
 
 export default WordleApp;
