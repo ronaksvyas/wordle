@@ -28,7 +28,7 @@ function getButton(char, onclick) {
 
 const onclick = (dispatch, char) => (e) => {
   console.log('clicked ', char);
-  dispatch({ type: ACTION_KEYPRESS, data: { char: char } });
+  dispatch({ type: ACTION_KEYPRESS, data: { char: char.toLowerCase() } });
 };
 const keyboardMap = [
   ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],

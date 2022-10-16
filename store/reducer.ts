@@ -1,5 +1,12 @@
-import { ACTION_CHECK_WORD, ACTION_DELETE, ACTION_FOCUS_NEXT, ACTION_GAME_STATUS_CHANGE, ACTION_KEYPRESS } from "./actions";
-import { cellStatus } from "./cells-context";
+import { getUnicodeDelete, getUnicodeEnter } from '../components/Keyboard';
+import {
+  ACTION_CHECK_WORD,
+  ACTION_DELETE,
+  ACTION_FOCUS_NEXT,
+  ACTION_GAME_STATUS_CHANGE,
+  ACTION_KEYPRESS,
+} from './actions';
+import { cellStatus, GameStatus, wordStatus } from './state';
 
 export default function reducer(state, action) {
   switch (action.type) {
@@ -12,11 +19,11 @@ export default function reducer(state, action) {
     case ACTION_GAME_STATUS_CHANGE:
       return gameStatusChange(state);
     default:
-      throw new Error();
+      console.log('default action, no reducer here');
   }
 }
 
-function checkWord(state){
+function checkWord(state) {
   return state;
 }
 
@@ -24,12 +31,23 @@ function deleteAction(state) {
   return state;
 }
 
-function keypress(state, data) {
+function keypress(oldState, data) {
+  data.char = data.char.toLowerCase();
+  const state = structuredClone(oldState);
   const cRow = state?.currentCell?.row;
   const cCol = state?.currentCell?.column;
   console.log(`${cRow}, ${cCol}`, state);
   const [nextRow, nextColumn] = getNextRowColCell(cRow, cCol);
-  
+
+  //check if word is over and user trying to enter next letter
+  if (
+    state.words[cRow - 1]?.word.length === 5 &&
+    ![getUnicodeEnter(), getUnicodeDelete()].includes(data.char) &&
+    [wordStatus.UNTOUCHED].includes(state.words[cRow - 1].status)
+  ) {
+    alert('Press enter before proceeding');
+    return state;
+  }
   //if current is the last cell handle it separately
 
   //if current cell is the last cell of the word then
@@ -37,15 +55,26 @@ function keypress(state, data) {
   //check word
   //lock all cells in that row if the word is valid
 
-  //set next row and column as current
-  state.currentCell = {row: nextRow, column: nextColumn};
   //do focusNext action
 
-  state.words[cRow].cells[cCol].cellStatus = cellStatus.TOUCHED;
-  state.words[cRow].cells[cCol].value = data.char;
-  state.words[cRow].word = state.words[cRow].cells.map(cell => cell.value).join('');
-  
-  
+  //check for word status change when the word is over
+  if (
+    cCol === 0 &&
+    state.words[cRow - 1]?.word.length === 5 &&
+    data.char === getUnicodeEnter()
+  ) {
+    const wordStatus = updateWordAndGameStatus(state, cRow - 1);
+    if (wordStatus === true || wordStatus === false) {
+      return state;
+    }
+  }
+  if ([getUnicodeEnter(), getUnicodeDelete()].includes(data.char)) return state;
+
+  //update current cell with input char and update current word too
+  setCurrentCellAndUpdateWord(state, data.char);
+
+  //set next row and column as current
+  setNextCellAsCurrent(state);
 
   //change current cell status
 
@@ -53,19 +82,72 @@ function keypress(state, data) {
   return state;
 }
 
-function getNextRowColCell(cRow, cCol){
-  let nextCol = (cCol + 1)%5;
-  if(cRow === 4 && cCol === 4){
-    return [0,0];
+function setCurrentCellAndUpdateWord(state, char) {
+  if ([getUnicodeEnter(), getUnicodeDelete()].includes(char)) return;
+  const cRow = state?.currentCell?.row;
+  const cCol = state?.currentCell?.column;
+
+  state.words[cRow].cells[cCol].cellStatus = cellStatus.UNKNOWN;
+  state.words[cRow].cells[cCol].value = char.toLowerCase();
+  state.words[cRow].word = state.words[cRow].cells
+    .map((cell) => cell.value)
+    .join('');
+}
+
+function updateWordAndGameStatus(state, wordIndex) {
+  for (let i = 0; i < 5; i++) {
+      state.words[wordIndex].cells[i].cellStatus =
+        cellStatus.INCORRECT;
+      if(state.words[wordIndex].word[i].toLowerCase() === state.winnerWord[i]){
+        state.words[wordIndex].cells[i].cellStatus = cellStatus.CORRECT;
+        continue;
+      }
+      if(state.winnerWord.split('').includes(state.words[wordIndex].cells[i].value)){
+        state.words[wordIndex].cells[i].cellStatus = cellStatus.INCORRECT_POSITION;
+        continue;
+      }
   }
 
-  if(nextCol === 0){
-    return [cRow+1, nextCol];
+  state.words[wordIndex].status = wordStatus.INCORRECT;
+  //successful return
+  if (state.words[wordIndex] === state.winnerWord) {
+    state.gameStatus = GameStatus.FINISHED_SUCCESS;
+    return true;
+  }
+
+  //check if last word but unsuccessfull
+  if (
+    wordIndex === 4 &&
+    state.words[wordIndex][4].length === 5 &&
+    state.words[wordIndex][4] !== state.winnerWord
+  ) {
+    state.gameStatus = GameStatus.FINISHED_FAIL;
+    return false;
+  }
+
+  return undefined;
+}
+
+function setNextCellAsCurrent(state) {
+  const cRow = state?.currentCell?.row;
+  const cCol = state?.currentCell?.column;
+  const [nextRow, nextColumn] = getNextRowColCell(cRow, cCol);
+  state.currentCell = { row: nextRow, column: nextColumn };
+}
+
+function getNextRowColCell(cRow, cCol) {
+  let nextCol = (cCol + 1) % 5;
+  if (cRow === 4 && cCol === 4) {
+    return [0, 0];
+  }
+
+  if (nextCol === 0) {
+    return [cRow + 1, nextCol];
   }
 
   return [cRow, nextCol];
-
 }
+
 function gameStatusChange(state) {
   return state;
 }

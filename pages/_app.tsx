@@ -9,7 +9,7 @@ export const WordleContext = React.createContext({
   dispatch: null,
 });
 
-function WordleApp({ Component, pageProps }) {
+function WordleApp({ Component, pageProps, children }) {
   const [state, dispatch] = useReducer(reducer, initialState); 
 
   return (

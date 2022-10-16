@@ -1,14 +1,5 @@
-export enum cellStatus {
-  UNTOUCHED,
-  TOUCHED,
-  LOCKED
-}
+import { cellStatus, wordStatus } from "./state";
 
-export enum wordStatus{
-  UNTOUCHED,
-  TOUCHED,
-  LOCKED
-}
 
 interface CellContext{
   status: cellStatus,
@@ -24,7 +15,7 @@ interface WordContext{
 }
 
 const defaultCellContext : CellContext = {
-  status: cellStatus.UNTOUCHED,
+  status: cellStatus.UNKNOWN,
   value: ' ',
   row: 0,
   column : 0

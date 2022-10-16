@@ -1,13 +1,15 @@
 export enum cellStatus {
-  UNTOUCHED,
-  TOUCHED,
+  CORRECT,
+  INCORRECT,
+  INCORRECT_POSITION,
+  UNKNOWN,
   LOCKED,
 }
 
 export enum wordStatus {
   UNTOUCHED,
-  TOUCHED,
-  LOCKED,
+  CORRECT,
+  INCORRECT,
 }
 
 interface CellContext {
@@ -29,16 +31,18 @@ interface WordContext {
   status: wordStatus;
 }
 
-enum GameStatus {
+export enum GameStatus {
   NOT_STARTED,
   IN_PROGRESS,
-  FINISHED,
+  FINISHED_SUCCESS,
+  FINISHED_FAIL
 }
 
 interface WordleContext {
   words: WordContext[]| [];
   currentCell: currentCellRef | {};
   gameStatus: GameStatus;
+  winnerWord: string
 }
 
 function getInitialWordsState<Type extends {length: number}>(){
@@ -64,4 +68,5 @@ export const initialState: WordleContext = {
   words: defaultWords,
   currentCell: {row: 0, column: 0},
   gameStatus: GameStatus.NOT_STARTED,
+  winnerWord: 'futon'
 };
