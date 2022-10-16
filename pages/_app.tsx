@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { ChakraProvider } from '@chakra-ui/provider';
 import theme from './theme';
 import { initialState } from '../store/state';
@@ -11,6 +11,21 @@ export const WordleContext = React.createContext({
 
 function WordleApp({ Component, pageProps, children }) {
   const [state, dispatch] = useReducer(reducer, initialState); 
+
+  //send the request to fetch a new word if word doesn't exist
+  useEffect(() => {
+    fetch(
+      'https://thatwordleapi.azurewebsites.net/get/',
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+      .then((res) => res.json())
+      .then((res) => {state.winnerWord = res.Response});
+  }, []);
 
   return (
     <ChakraProvider theme={theme}>

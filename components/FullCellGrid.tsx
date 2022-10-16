@@ -3,7 +3,7 @@ import { VStack } from '@chakra-ui/react';
 import FiveCells from './FiveCells';
 import Title from './Title';
 
-export default function FullCellGrid(props) {
+export default function FullCellGrid() {
   return (
     <>
       <VStack spacing={16}>

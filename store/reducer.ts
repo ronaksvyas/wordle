@@ -1,8 +1,6 @@
 import { getUnicodeDelete, getUnicodeEnter } from '../components/Keyboard';
 import {
-  ACTION_CHECK_WORD,
   ACTION_DELETE,
-  ACTION_FOCUS_NEXT,
   ACTION_GAME_STATUS_CHANGE,
   ACTION_KEYPRESS,
 } from './actions';
@@ -10,8 +8,6 @@ import { cellStatus, GameStatus, wordStatus } from './state';
 
 export default function reducer(state, action) {
   switch (action.type) {
-    case ACTION_CHECK_WORD:
-      return checkWord(state);
     case ACTION_DELETE:
       return deleteAction(state);
     case ACTION_KEYPRESS:
@@ -21,10 +17,6 @@ export default function reducer(state, action) {
     default:
       console.log('default action, no reducer here');
   }
-}
-
-function checkWord(state) {
-  return state;
 }
 
 function deleteAction(state) {
@@ -110,7 +102,8 @@ function updateWordAndGameStatus(state, wordIndex) {
 
   state.words[wordIndex].status = wordStatus.INCORRECT;
   //successful return
-  if (state.words[wordIndex] === state.winnerWord) {
+  if (state.words[wordIndex].word === state.winnerWord) {
+    state.words[wordIndex].status = wordStatus.CORRECT;
     state.gameStatus = GameStatus.FINISHED_SUCCESS;
     return true;
   }
@@ -149,5 +142,19 @@ function getNextRowColCell(cRow, cCol) {
 }
 
 function gameStatusChange(state) {
+  return state;
+}
+async function getNewWord(oldState: any, action: any) {
+  const state = structuredClone(oldState);
+  const response = await fetch('https://thatwordleapi.azurewebsites.net/get/', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+    .then((res) => res.json())
+    .then((res) => res);
+  console.log("got response from api, ", response)
+  state.winnerWord = response?.Response || "futon";
   return state;
 }

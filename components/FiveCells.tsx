@@ -8,7 +8,6 @@ export default function FiveCells(props) {
   const wordleContext = useContext(WordleContext);
   const { state } = wordleContext;
   const { index } = props;
-  console.log(state.words[index].word );
   return (
     <>
       <HStack>
