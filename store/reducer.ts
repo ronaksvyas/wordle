@@ -1,10 +1,10 @@
 import { getUnicodeDelete, getUnicodeEnter } from '../components/Keyboard';
 import {
   ACTION_DELETE,
-  ACTION_GAME_STATUS_CHANGE,
   ACTION_KEYPRESS,
+  ACTION_GAME_RESET
 } from './actions';
-import { cellStatus, GameStatus, wordStatus } from './state';
+import { cellStatus, GameStatus, initialState, wordStatus } from './state';
 
 export default function reducer(state, action) {
   switch (action.type) {
@@ -12,8 +12,6 @@ export default function reducer(state, action) {
       return deleteAction(state);
     case ACTION_KEYPRESS:
       return keypress(state, action.data);
-    case ACTION_GAME_STATUS_CHANGE:
-      return gameStatusChange(state);
     default:
       console.log('default action, no reducer here');
   }
@@ -21,6 +19,10 @@ export default function reducer(state, action) {
 
 function deleteAction(state) {
   return state;
+}
+
+function gameReset(state){
+  return initialState;
 }
 
 function keypress(oldState, data) {
