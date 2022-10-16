@@ -1,6 +1,6 @@
 import React, { useEffect, useReducer } from 'react';
 import { ChakraProvider } from '@chakra-ui/provider';
-import theme from './theme';
+import theme from '../components/theme';
 import { initialState } from '../store/state';
 import reducer from '../store/reducer';
 
