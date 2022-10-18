@@ -30,7 +30,7 @@ See the demo at http://wordle.ronakvyas.com
 
 ## Notes
 
-I made this fun project to learn React. I have used useReducer for keypress action and useEffect hook for fetching new word and validating the current word in dictionary through an API.
+I made this fun project to learn React. I have used useReducer for keypress action and useEffect hook for fetching new word and validating the current word in dictionary through an API. I also used [Chakra UI](https://chakra-ui.com/) for React Components
 
 Special thanks to https://github.com/awsare/Wordle-API for providing public api for this.
 
