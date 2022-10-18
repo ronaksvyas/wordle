@@ -46,6 +46,7 @@ interface WordleContext {
   currentCell: currentCellRef | {};
   gameStatus: GameStatus;
   winnerWord: string;
+  letters: {}
 }
 
 function getInitialWordsState<Type extends { length: number }>() {
@@ -79,4 +80,5 @@ export const initialState: WordleContext = {
   currentCell: { row: 0, column: 0 },
   gameStatus: GameStatus.NOT_STARTED,
   winnerWord: 'futon',
+  letters: {}
 };

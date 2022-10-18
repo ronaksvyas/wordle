@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { Button, Grid, Stack } from '@chakra-ui/react';
 import { ACTION_KEYPRESS } from '../store/actions';
 import { WordleContext } from '../pages/_app';
+import { cellStatus } from '../store/state';
 
 export function getUnicodeDelete() {
   return '⌫';
@@ -11,16 +12,16 @@ export function getUnicodeEnter() {
   return '⏎';
 }
 
-function getButton(char, onclick) {
+function getButton(char, onclick, backgroundColor) {
   return (
     <Button
       borderRadius="8px"
-      colorScheme="gray"
       key={char}
       width="1vh"
       minWidth={8}
       height="4.5vh"
       onClick={onclick}
+      backgroundColor={backgroundColor}
     >
       {char}
     </Button>
@@ -39,7 +40,16 @@ const keyboardMap = [
 
 export default function Keyboard(props) {
   const wordleContext = useContext(WordleContext);
-  const { dispatch } = wordleContext;
+  const { dispatch, state } = wordleContext;
+  const letters = state.letters;
+
+  let backGroundColorMap = {
+    [cellStatus.INCORRECT_POSITION]: 'yellow.500',
+    [cellStatus.CORRECT]: 'green.500',
+    [cellStatus.INCORRECT]: 'gray.400',
+    [cellStatus.UNKNOWN]: '',
+  };
+ 
   return (
     <Stack direction={['column']} gap={1.5}>
       {keyboardMap.map((line, index) => {
@@ -50,7 +60,8 @@ export default function Keyboard(props) {
             templateColumns={`repeat(${line.length}, 1fr)`}
           >
             {line.map((char) => {
-              return getButton(char, onclick(dispatch, char));
+              const backgroundColor = backGroundColorMap[letters[char.toLowerCase()]];
+              return getButton(char, onclick(dispatch, char), backgroundColor);
             })}
           </Grid>
         );

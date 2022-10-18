@@ -106,16 +106,21 @@ function updateWordAndGameStatus(state, wordIndex) {
     return 'notValidWord';
   }
   for (let i = 0; i < 5; i++) {
-    state.words[wordIndex].cells[i].cellStatus = cellStatus.INCORRECT;
+    let cell = state.words[wordIndex].cells[i];
+    cell.cellStatus = cellStatus.INCORRECT;
+    if(!state.letters[cell.value]) state.letters[cell.value] = cellStatus.INCORRECT;
     if (wordToCheck.word[i].toLowerCase() === state.winnerWord[i]) {
-      state.words[wordIndex].cells[i].cellStatus = cellStatus.CORRECT;
+      cell.cellStatus = cellStatus.CORRECT;
+      state.letters[cell.value] = cellStatus.CORRECT;
       continue;
     }
     if (
       state.winnerWord.split('').includes(state.words[wordIndex].cells[i].value)
     ) {
-      state.words[wordIndex].cells[i].cellStatus =
-        cellStatus.INCORRECT_POSITION;
+      cell.cellStatus = cellStatus.INCORRECT_POSITION;
+      if (!state.letters[cell.value] || state.letters[cell.value] === cellStatus.INCORRECT) {
+        state.letters[cell.value] = cellStatus.INCORRECT_POSITION;
+      }
       continue;
     }
   }

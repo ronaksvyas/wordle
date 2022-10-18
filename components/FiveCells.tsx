@@ -19,20 +19,19 @@ export default function FiveCells(props) {
           placeholder={''}
         >
           {state.words[index].cells.map((cell, index) => {
-            // const readOnly = cell?.cellStatus === cellStatus.LOCKED;
             let borderColorMap = {
               [cellStatus.INCORRECT_POSITION]: 'yellow.500',
               [cellStatus.CORRECT]: 'green.500',
-              [cellStatus.INCORRECT]: 'red.500',
+              [cellStatus.INCORRECT]: 'gray.500',
               [cellStatus.UNKNOWN]: ''
             };
-
 
             return (
               <PinInputField
                 key={index}
                 borderColor={borderColorMap[cell?.cellStatus] || ''}
                 borderWidth={2}
+                backgroundColor={borderColorMap[cell?.cellStatus] || ''}
               />
             );
           })}
