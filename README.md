@@ -26,7 +26,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## Demo site
 
-See the demo at https://wordle.ronakvyas.com
+See the demo at http://wordle.ronakvyas.com
 
 ## Notes
 
