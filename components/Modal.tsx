@@ -35,7 +35,6 @@ export function GameStatusModal() {
               <>GAME OVER!</>
             )}
           </ModalHeader>
-          <ModalCloseButton />
           <ModalBody>
             {state.gameStatus === GameStatus.FINISHED_SUCCESS && (
               <>

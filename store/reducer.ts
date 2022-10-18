@@ -11,7 +11,6 @@ export default function reducer(state, action) {
   }
 }
 
-
 function keypress(oldState, data) {
   data.char = data.char.toLowerCase();
   const state = structuredClone(oldState);
@@ -37,11 +36,13 @@ function keypress(oldState, data) {
 
   //check for word status change when the word is over
   if (
-    cCol === 0 &&
-    state.words[cRow - 1]?.word.length === 5 &&
-    data.char === getUnicodeEnter()
+    (cCol === 0 &&
+      state.words[cRow - 1]?.word.length === 5 &&
+      data.char === getUnicodeEnter()) ||
+    (cCol === 4 && cRow === 4 && data.char === getUnicodeEnter())
   ) {
-    const wordStatus = updateWordAndGameStatus(state, cRow - 1);
+    const rowToCheck = cRow === 4 && cCol === 4 ? 4 : cRow - 1;
+    const wordStatus = updateWordAndGameStatus(state, rowToCheck);
     if (wordStatus === 'notValidWord') {
       return state;
     }
@@ -58,6 +59,7 @@ function keypress(oldState, data) {
 }
 
 function handleDelete(state, cRow, cCol) {
+  let alreadySetColumn = false;
   //if last word is processed then dont move to last word
   if (
     cCol === 0 &&
@@ -67,13 +69,17 @@ function handleDelete(state, cRow, cCol) {
   ) {
     cCol = 4;
     cRow = cRow - 1;
+    alreadySetColumn = true;
   }
   const wordIndex = cRow;
   let currWordObj = state.words[wordIndex];
   const currCell = state.words[wordIndex].cells[cCol];
   currCell.value = '';
   currCell.cellStatus = cellStatus.UNKNOWN;
-  state.currentCell = { row: cRow, column: Math.max(cCol - 1,0) };
+  state.currentCell = {
+    row: cRow,
+    column: alreadySetColumn ? cCol : Math.max(cCol - 1, 0),
+  };
   currWordObj.word = currWordObj.word.substring(0, currWordObj.word.length - 1);
   currWordObj.isAValidEnglishWord = false;
   currWordObj.alertShown = false;
@@ -94,10 +100,7 @@ function setCurrentCellAndUpdateWord(state, char) {
 
 function updateWordAndGameStatus(state, wordIndex) {
   const wordToCheck = state.words[wordIndex];
-  if (
-    wordToCheck.wordCheckedInDictionary &&
-    !wordToCheck.isAValidEnglishWord
-  ) {
+  if (wordToCheck.wordCheckedInDictionary && !wordToCheck.isAValidEnglishWord) {
     alert(`${wordToCheck.word} is not a valid English word`);
     wordToCheck.alertShown = true;
     return 'notValidWord';
@@ -127,8 +130,8 @@ function updateWordAndGameStatus(state, wordIndex) {
   //check if last word but unsuccessfull
   if (
     wordIndex === 4 &&
-    state.words[wordIndex][4].length === 5 &&
-    state.words[wordIndex][4] !== state.winnerWord
+    state.words[4].word.length === 5 &&
+    state.words[4].word !== state.winnerWord
   ) {
     state.gameStatus = GameStatus.FINISHED_FAIL;
     return 'failure';
@@ -147,7 +150,7 @@ function setNextCellAsCurrent(state) {
 function getNextRowColCell(cRow, cCol) {
   let nextCol = (cCol + 1) % 5;
   if (cRow === 4 && cCol === 4) {
-    return [0, 0];
+    return [4, 4];
   }
 
   if (nextCol === 0) {
