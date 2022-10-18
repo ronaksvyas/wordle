@@ -1,3 +1,7 @@
+## Screenshots
+
+![image](https://user-images.githubusercontent.com/4312585/196310722-3a199276-4e15-49c6-b212-d98d378130b9.png)
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Dev Setup
