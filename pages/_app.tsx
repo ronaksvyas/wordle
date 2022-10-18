@@ -10,22 +10,51 @@ export const WordleContext = React.createContext({
 });
 
 function WordleApp({ Component, pageProps, children }) {
-  const [state, dispatch] = useReducer(reducer, initialState); 
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   //send the request to fetch a new word if word doesn't exist
   useEffect(() => {
-    fetch(
-      'https://thatwordleapi.azurewebsites.net/get/',
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    )
+    fetch('https://thatwordleapi.azurewebsites.net/get/', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
       .then((res) => res.json())
-      .then((res) => {state.winnerWord = res.Response});
+      .then((res) => {
+        state.winnerWord = res.Response;
+      });
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  useEffect(() => {
+    let wordIndexToCheck;
+    for (let i = 0; i < 5; i++) {
+      if (
+        state.words[i].word.length === 5 &&
+        !state.words[i].wordCheckedInDictionary
+      ) {
+        wordIndexToCheck = i;
+        break;
+      }
+    }
+    if (wordIndexToCheck > -1) {
+      fetch(
+        `https://thatwordleapi.azurewebsites.net/ask/?word=${state.words[wordIndexToCheck].word}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      )
+        .then((res) => res.json())
+        .then((res) => {
+          state.words[wordIndexToCheck].isAValidEnglishWord = res.Response;
+          state.words[wordIndexToCheck].wordCheckedInDictionary = true;
+        });
+    }
+  }, [state.words]);
 
   return (
     <ChakraProvider theme={theme}>

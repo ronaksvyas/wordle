@@ -1,15 +1,9 @@
 import { getUnicodeDelete, getUnicodeEnter } from '../components/Keyboard';
-import {
-  ACTION_DELETE,
-  ACTION_KEYPRESS,
-  ACTION_GAME_RESET
-} from './actions';
+import { ACTION_DELETE, ACTION_KEYPRESS } from './actions';
 import { cellStatus, GameStatus, initialState, wordStatus } from './state';
 
 export default function reducer(state, action) {
   switch (action.type) {
-    case ACTION_DELETE:
-      return deleteAction(state);
     case ACTION_KEYPRESS:
       return keypress(state, action.data);
     default:
@@ -17,13 +11,6 @@ export default function reducer(state, action) {
   }
 }
 
-function deleteAction(state) {
-  return state;
-}
-
-function gameReset(state){
-  return initialState;
-}
 
 function keypress(oldState, data) {
   data.char = data.char.toLowerCase();
@@ -31,25 +18,22 @@ function keypress(oldState, data) {
   const cRow = state?.currentCell?.row;
   const cCol = state?.currentCell?.column;
   console.log(`${cRow}, ${cCol}`, state);
-  const [nextRow, nextColumn] = getNextRowColCell(cRow, cCol);
+
+  // if delete button is pressed
+  if (getUnicodeDelete() === data.char) {
+    handleDelete(state, cRow, cCol);
+    return state;
+  }
 
   //check if word is over and user trying to enter next letter
   if (
     state.words[cRow - 1]?.word.length === 5 &&
-    ![getUnicodeEnter(), getUnicodeDelete()].includes(data.char) &&
+    ![getUnicodeEnter()].includes(data.char) &&
     [wordStatus.UNTOUCHED].includes(state.words[cRow - 1].status)
   ) {
     alert('Press enter before proceeding');
     return state;
   }
-  //if current is the last cell handle it separately
-
-  //if current cell is the last cell of the word then
-
-  //check word
-  //lock all cells in that row if the word is valid
-
-  //do focusNext action
 
   //check for word status change when the word is over
   if (
@@ -58,7 +42,7 @@ function keypress(oldState, data) {
     data.char === getUnicodeEnter()
   ) {
     const wordStatus = updateWordAndGameStatus(state, cRow - 1);
-    if (wordStatus === true || wordStatus === false) {
+    if (wordStatus === 'notValidWord') {
       return state;
     }
   }
@@ -70,10 +54,30 @@ function keypress(oldState, data) {
   //set next row and column as current
   setNextCellAsCurrent(state);
 
-  //change current cell status
-
-  //
   return state;
+}
+
+function handleDelete(state, cRow, cCol) {
+  //if last word is processed then dont move to last word
+  if (
+    cCol === 0 &&
+    cRow !== 0 &&
+    state.words[cRow].status === wordStatus.UNTOUCHED &&
+    state.words[cRow - 1].status !== wordStatus.INCORRECT
+  ) {
+    cCol = 4;
+    cRow = cRow - 1;
+  }
+  const wordIndex = cRow;
+  let currWordObj = state.words[wordIndex];
+  const currCell = state.words[wordIndex].cells[cCol];
+  currCell.value = '';
+  currCell.cellStatus = cellStatus.UNKNOWN;
+  state.currentCell = { row: cRow, column: Math.max(cCol - 1,0) };
+  currWordObj.word = currWordObj.word.substring(0, currWordObj.word.length - 1);
+  currWordObj.isAValidEnglishWord = false;
+  currWordObj.alertShown = false;
+  currWordObj.wordCheckedInDictionary = false;
 }
 
 function setCurrentCellAndUpdateWord(state, char) {
@@ -89,25 +93,35 @@ function setCurrentCellAndUpdateWord(state, char) {
 }
 
 function updateWordAndGameStatus(state, wordIndex) {
-  for (let i = 0; i < 5; i++) {
-      state.words[wordIndex].cells[i].cellStatus =
-        cellStatus.INCORRECT;
-      if(state.words[wordIndex].word[i].toLowerCase() === state.winnerWord[i]){
-        state.words[wordIndex].cells[i].cellStatus = cellStatus.CORRECT;
-        continue;
-      }
-      if(state.winnerWord.split('').includes(state.words[wordIndex].cells[i].value)){
-        state.words[wordIndex].cells[i].cellStatus = cellStatus.INCORRECT_POSITION;
-        continue;
-      }
+  const wordToCheck = state.words[wordIndex];
+  if (
+    wordToCheck.wordCheckedInDictionary &&
+    !wordToCheck.isAValidEnglishWord
+  ) {
+    alert(`${wordToCheck.word} is not a valid English word`);
+    wordToCheck.alertShown = true;
+    return 'notValidWord';
   }
-
+  for (let i = 0; i < 5; i++) {
+    state.words[wordIndex].cells[i].cellStatus = cellStatus.INCORRECT;
+    if (wordToCheck.word[i].toLowerCase() === state.winnerWord[i]) {
+      state.words[wordIndex].cells[i].cellStatus = cellStatus.CORRECT;
+      continue;
+    }
+    if (
+      state.winnerWord.split('').includes(state.words[wordIndex].cells[i].value)
+    ) {
+      state.words[wordIndex].cells[i].cellStatus =
+        cellStatus.INCORRECT_POSITION;
+      continue;
+    }
+  }
   state.words[wordIndex].status = wordStatus.INCORRECT;
   //successful return
-  if (state.words[wordIndex].word === state.winnerWord) {
+  if (wordToCheck.word === state.winnerWord) {
     state.words[wordIndex].status = wordStatus.CORRECT;
     state.gameStatus = GameStatus.FINISHED_SUCCESS;
-    return true;
+    return 'success';
   }
 
   //check if last word but unsuccessfull
@@ -117,7 +131,7 @@ function updateWordAndGameStatus(state, wordIndex) {
     state.words[wordIndex][4] !== state.winnerWord
   ) {
     state.gameStatus = GameStatus.FINISHED_FAIL;
-    return false;
+    return 'failure';
   }
 
   return undefined;
@@ -141,22 +155,4 @@ function getNextRowColCell(cRow, cCol) {
   }
 
   return [cRow, nextCol];
-}
-
-function gameStatusChange(state) {
-  return state;
-}
-async function getNewWord(oldState: any, action: any) {
-  const state = structuredClone(oldState);
-  const response = await fetch('https://thatwordleapi.azurewebsites.net/get/', {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
-    .then((res) => res.json())
-    .then((res) => res);
-  console.log("got response from api, ", response)
-  state.winnerWord = response?.Response || "futon";
-  return state;
 }

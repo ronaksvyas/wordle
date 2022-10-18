@@ -18,7 +18,8 @@ function getButton(char, onclick) {
       colorScheme="gray"
       key={char}
       width="1vh"
-      height="5vh"
+      minWidth={8}
+      height="4.5vh"
       onClick={onclick}
     >
       {char}
@@ -45,7 +46,7 @@ export default function Keyboard(props) {
         return (
           <Grid
             key={index}
-            gap={'1px'}
+            gap={'3px'}
             templateColumns={`repeat(${line.length}, 1fr)`}
           >
             {line.map((char) => {

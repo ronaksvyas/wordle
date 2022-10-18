@@ -10,7 +10,7 @@ export default function FiveCells(props) {
   const { index } = props;
   return (
     <>
-      <HStack>
+      <HStack spacing={4}>
         <PinInput
           type="alphanumeric"
           size="lg"
@@ -31,7 +31,6 @@ export default function FiveCells(props) {
             return (
               <PinInputField
                 key={index}
-                // onChange={onCellValueChange}
                 borderColor={borderColorMap[cell?.cellStatus] || ''}
                 borderWidth={2}
               />
